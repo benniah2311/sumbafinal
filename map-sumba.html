@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Peta Wilayah Pulau Sumba</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Inisialisasi peta
+  var map = L.map('map').setView([-9.6, 119.6], 8); // Fokus ke Sumba
+
+  // Tambahkan tile layer dari OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Fungsi untuk menentukan warna per kabupaten
+  function getColor(nama) {
+    switch (nama) {
+      case 'Sumba Timur': return '#FF9999';
+      case 'Sumba Tengah': return '#FFD700';
+      case 'Sumba Barat': return '#87CEFA';
+      case 'Sumba Barat Daya': return '#90EE90';
+      default: return '#CCCCCC';
+    }
+  }
+
+  // Load file GeoJSON gabungan
+  fetch('sumba.json') // Pastikan path file benar
+    .then(response => response.json())
+    .then(data => {
+      L.geoJSON(data, {
+        style: feature => ({
+          color: '#555',
+          weight: 2,
+          fillColor: getColor(feature.properties.nama_kabupaten),
+          fillOpacity: 0.6
+        }),
+        onEachFeature: (feature, layer) => {
+          const nama = feature.properties.nama_kabupaten || 'Tidak Diketahui';
+          layer.bindPopup(`<b>${nama}</b>`);
+        }
+      }).addTo(map);
+    })
+    .catch(err => console.error("Gagal memuat GeoJSON:", err));
+</script>
+
+</body>
+</html>
