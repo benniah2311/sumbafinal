@@ -33,7 +33,7 @@
   }).addTo(map);
 
   // Load file GeoJSON kabupaten di Pulau Sumba
-  fetch('sumba_kabupaten.geojson')
+  fetch('sumba.geojson')
     .then(response => response.json())
     .then(data => {
       L.geoJSON(data, {
