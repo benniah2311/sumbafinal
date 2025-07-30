@@ -2,58 +2,60 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Peta Kabupaten di Pulau Sumba</title>
+  <title>Peta Kabupaten NTT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
   <style>
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
+    #map { height: 100vh; }
   </style>
 </head>
 <body>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <!-- Leaflet.js -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Peta dan GeoJSON -->
+  <script>
+    // Inisialisasi peta
+    var map = L.map('map').setView([-9.5, 119.8], 8);
 
-<script>
-  // Inisialisasi peta
-  var map = L.map('map').setView([-9.7, 119.5], 8); // Koordinat tengah Pulau Sumba
+    // Tambahkan basemap dari OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-  // Tambahkan basemap dari OpenStreetMap
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-
-  // Load file GeoJSON kabupaten di Pulau Sumba
-  fetch('sumba.geojson')
-    .then(response => response.json())
-    .then(data => {
-      L.geoJSON(data, {
-        style: function (feature) {
+    // Load file GeoJSON lokal
+    fetch('sumba.geojson') // <--- file GeoJSON kamu
+      .then(res => res.json())
+      .then(geojsonData => {
+        // Warna berdasarkan NAMOBJ
+        function getColor(nama) {
           return {
-            color: "#0077be",
-            weight: 2,
-            fillOpacity: 0.3
-          };
-        },
-        onEachFeature: function (feature, layer) {
-          let namaKabupaten = feature.properties.WADMKK || feature.properties.NAMOBJ || "Tidak diketahui";
-          layer.bindPopup(`<strong>${namaKabupaten}</strong>`);
+            "Sumba Barat": "#4caf50",
+            "Sumba Barat Daya": "#ff9800",
+            "Sumba Tengah": "#2196f3",
+            "Sumba Timur": "#f44336"
+          }[nama] || "#cccccc";
         }
-      }).addTo(map);
-    })
-    .catch(error => {
-      console.error("Gagal load GeoJSON:", error);
-    });
-</script>
 
+        function style(feature) {
+          return {
+            fillColor: getColor(feature.properties.NAMOBJ),
+            color: "white",
+            weight: 1,
+            fillOpacity: 0.7
+          };
+        }
+
+        // Tambahkan layer GeoJSON ke peta
+        L.geoJSON(geojsonData, {
+          style: style,
+          onEachFeature: function (feature, layer) {
+            layer.bindPopup(`<b>${feature.properties.NAMOBJ}</b>`);
+          }
+        }).addTo(map);
+      });
+  </script>
 </body>
 </html>
